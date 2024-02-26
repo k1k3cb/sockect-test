@@ -1,35 +1,37 @@
 const express = require('express');
-const app = express();
 const cors = require('cors');
-const mongoose = require('mongoose');
+const app = express();
+const { Server } = require('socket.io');
+const establishSocketConnection = require('./socket-controller/socket-controller');
 
-require('dotenv').config();
+const server = require('http').Server(app);
 
-// Rutas
+const io= new Server(server,{
+
+  cors:{
+    origin:'*'
+  }
+
+});
+
+
 
 // Middlewares para cliente
-// Opciones avanzadas de configuración de CORS
-const corsOptions = {
-  origin: 'http://localhost:5173', // Dominios autorizados
-  methods: '*', // Métodos permitidos
-  optionsSuccessStatus: 204,
-};
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
-// Uso de rutas
-const startServer = async (params) => {
-  try {
-    await mongoose.connect(
-      `${process.env.MONGODB_URL}/${process.env.DATABASE}`
-    );
-    console.log('Connected to database ');
-    app.listen(3000, () =>
-      console.log('Servidor en ejecución en el puerto 3000')
-    );
-  } catch (error) {
-    console.log('Connection error', error);
-  }
+
+io.on('connection', socket=>{
+
+  establishSocketConnection(socket,io);
+})
+
+const startServer = () => {
+  app.listen(3000, () =>
+    console.log('Servidor en ejecución en el puerto 3000')
+  );
+  server.listen(4000,() =>
+  console.log('Servidor Socket en ejecución en el puerto 4000'))
 };
 
 startServer();
