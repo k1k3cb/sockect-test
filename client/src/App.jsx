@@ -7,14 +7,31 @@ const App = () => {
 	const [counter, setCounter] = useState(0);
 
 	useEffect(() => {
-		socket.on('counter', newCounter => {
-			console.log(newCounter);
+		socket.on('new counter value', counterValue => {
+			setCounter(counterValue);
 		});
-
-		socket.on('userConnected', (users) => {
-			console.log(users);
-		  });
 	}, []);
+	useEffect(() => {
+		socket.emit('counter', counter);
+	}, [counter]);
+
+
+
+
+	useEffect(() => {
+		socket.on('users', allUsers => {
+			setConnectedUsers(allUsers);
+		});
+	}, []);
+
+	
+
+	// emit('evento que emite', datoQueEnvía)
+
+	// on('evento que escuchan', datoQueRecibe=>{
+
+	// })
+
 	return (
 		<>
 			<GlobalStyles />
@@ -26,20 +43,23 @@ const App = () => {
 			<button onClick={() => counterSubstract(counter, setCounter, socket)}>
 				-1
 			</button>
+
+			<h3>Usuarios Conectados:</h3>
+			<ul>
+				{connectedUsers.map(user => (
+					<li key={user}>{user}</li>
+				))}
+			</ul>
 		</>
 	);
 };
 
-const counterAdd = (counter, setCounter, socket) => {
-	const newCounter = counter + 1;
-	setCounter(newCounter);
-	socket.emit('counter', newCounter);
+const counterAdd = (counter, setCounter) => {
+	setCounter(counter + 1);
 };
 
-const counterSubstract = (counter, setCounter, socket) => {
-	const newCounter = counter - 1;
-	setCounter(newCounter);
-	socket.emit('counter', newCounter);
+const counterSubstract = (counter, setCounter) => {
+	setCounter(counter - 1);
 };
 
 const resetCounter = (setCounter, socket) => {
@@ -48,5 +68,3 @@ const resetCounter = (setCounter, socket) => {
 };
 
 export default App;
-
-// lista usuarios conectados y un contador
